@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="root" prefHeight="698.0" prefWidth="815.0" style="-fx-background-color: #262626;" stylesheets="@main.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.kotmw.eorzeatimer.Controller">
+   <children>
+      <VBox layoutX="14.0" layoutY="14.0" prefHeight="84.0" prefWidth="500.0" spacing="10.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" style="-fx-border-color: dimgray; -fx-border-width: 0 0 2 0;">
+               <children>
+                  <Label style="-fx-text-fill: white;" text="現実時間       ">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="realTime" alignment="CENTER_RIGHT" prefWidth="260.0" style="-fx-text-fill: white;" text="1970 / 01 / 01 00:00:00">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" style="-fx-border-color: dimgray; -fx-border-width: 0 0 2 0;">
+               <children>
+                  <Label style="-fx-text-fill: white;" text="エオルゼア時間">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="eorzeaTime" alignment="CENTER_RIGHT" prefWidth="260.0" style="-fx-text-fill: white;" text="0001 / 01 / 01 00:00:00">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets left="30.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+      <VBox layoutX="529.0" layoutY="14.0" style="-fx-border-color: gray; -fx-border-radius: 5px;">
+         <children>
+            <Label text="タイトル">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+            <TextField fx:id="alarmTitle" prefHeight="25.0" prefWidth="95.0">
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </TextField>
+            <Label text="指定時間タイプ">
+               <font>
+                  <Font size="16.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <VBox spacing="5.0">
+               <children>
+                  <RadioButton id="lt" mnemonicParsing="false" selected="true" text="(LT) ローカル時間" textFill="WHITE">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="timeType" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton id="et" mnemonicParsing="false" text="(ET) エオルゼア時間" textFill="WHITE" toggleGroup="$timeType">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </RadioButton>
+               </children>
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </VBox>
+            <Label text="時刻指定">
+               <font>
+                  <Font size="16.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Label>
+            <VBox alignment="TOP_RIGHT" prefHeight="105.0">
+               <children>
+                  <HBox spacing="10.0">
+                     <children>
+                        <VBox prefHeight="50.0" prefWidth="110.0">
+                           <children>
+                              <Label text="時 (0 ～ 23)" textFill="WHITE">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <Spinner fx:id="hourInput" editable="true" prefHeight="25.0" prefWidth="110.0" />
+                           </children>
+                        </VBox>
+                        <VBox prefHeight="50.0" prefWidth="110.0">
+                           <children>
+                              <Label text="分 (0 ～ 59)" textFill="WHITE">
+                                 <font>
+                                    <Font size="16.0" />
+                                 </font>
+                              </Label>
+                              <Spinner fx:id="minuteInput" editable="true" prefHeight="25.0" prefWidth="110.0" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <Label prefHeight="25.0" prefWidth="230.0" text="何分前に通知 (地球時間)" textFill="WHITE">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                     <padding>
+                        <Insets top="5.0" />
+                     </padding>
+                  </Label>
+                  <Spinner fx:id="agoMinute" editable="true" prefHeight="25.0" prefWidth="110.0" />
+               </children>
+               <VBox.margin>
+                  <Insets left="20.0" />
+               </VBox.margin>
+            </VBox>
+            <HBox alignment="TOP_CENTER" spacing="20.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onConfirm" prefHeight="25.0" prefWidth="100.0" text="決定" />
+               </children>
+               <VBox.margin>
+                  <Insets bottom="10.0" top="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </padding>
+      </VBox>
+      <VBox fx:id="alarmContainer" layoutX="14.0" layoutY="120.0" prefHeight="456.0" prefWidth="410.0" style="-fx-border-color: gray; -fx-border-radius: 5px;">
+         <padding>
+            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+         </padding></VBox>
+      <VBox layoutX="501.0" layoutY="363.0" prefHeight="301.0" prefWidth="300.0" style="-fx-border-color: gray; -fx-border-radius: 5px;">
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </padding>
+         <children>
+            <Label text="テンプレート">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+            <HBox alignment="TOP_RIGHT" spacing="10.0">
+               <children>
+                  <HBox>
+                     <children>
+                        <Label text="クラス：">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox fx:id="classSelect" prefHeight="25.0" prefWidth="80.0" />
+                     </children>
+                  </HBox>
+                  <HBox>
+                     <children>
+                        <Label text="パッチ：">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                        <ChoiceBox fx:id="patchSelect" prefHeight="25.0" prefWidth="80.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </HBox>
+            <HBox alignment="TOP_RIGHT">
+               <children>
+                  <Label text="エリア：">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+                  <ChoiceBox fx:id="areaSelect" prefHeight="25.0" prefWidth="100.0" />
+               </children>
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="TOP_RIGHT">
+               <padding>
+                  <Insets left="20.0" />
+               </padding>
+            </HBox>
+            <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" styleClass="edge-to-edge" vbarPolicy="ALWAYS">
+               <content>
+                  <VBox fx:id="timerTempList" prefHeight="1.0" prefWidth="265.0" />
+               </content>
+               <VBox.margin>
+                  <Insets top="5.0" />
+               </VBox.margin>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

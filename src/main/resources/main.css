@@ -1,0 +1,15 @@
+.label {
+    -fx-text-fill: white;
+}
+
+#alarmContainer .label {
+    -fx-font-size: 16px;
+}
+
+.choice-box .context-menu{
+    -fx-background-color: gray
+}
+
+.choice-box .label, .button .label {
+    -fx-text-fill: black;
+}
