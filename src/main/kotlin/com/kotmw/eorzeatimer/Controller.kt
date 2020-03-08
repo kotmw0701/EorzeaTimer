@@ -58,6 +58,8 @@ class Controller : Initializable{
             timerTempList.children.add(Button().apply {
                 prefWidth = 264.0
                 graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${"%02d".format(it.hour)}:00"))
+                val alarmTempData = it
+                setOnAction { addAlarm(alarmTempData) }
             })
         }
         hourInput.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23)
@@ -125,6 +127,10 @@ class Controller : Initializable{
         val title = if (alarmTitle.text.isNullOrEmpty()) "アラーム" else alarmTitle.text
         val type = (timeType.selectedToggle as RadioButton).id.toUpperCase()
         addAlarm(title, type, hourInput.value, minuteInput.value, agoMinute.value)
+    }
+
+    fun addAlarm(alarmTempData: AlarmTempData) {
+        addAlarm(alarmTempData.title, "ET", alarmTempData.hour)
     }
 
     fun addAlarm(title: String, type: String, hour: Int, minute: Int = 0, agoMinute: Int = 0) {
