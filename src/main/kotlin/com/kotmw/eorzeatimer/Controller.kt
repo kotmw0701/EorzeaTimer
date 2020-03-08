@@ -1,9 +1,6 @@
 package com.kotmw.eorzeatimer
 
-import javafx.animation.FadeTransition
-import javafx.animation.Interpolator
-import javafx.animation.KeyFrame
-import javafx.animation.Timeline
+import javafx.animation.*
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXML
@@ -80,6 +77,7 @@ class Controller : Initializable{
         vBox = VBox().apply {
             alignment = Pos.CENTER
             style = "-fx-background-color: transparent"
+            spacing = 5.0
             setPrefSize(screen.width, screen.height)
         }
         val primary = Stage().apply {
@@ -191,10 +189,20 @@ class Controller : Initializable{
             style = "-fx-font-size: 24px; -fx-text-fill: white; -fx-background-color: #0000FF60; -fx-background-radius: 10px"
         }
         vBox.children.add(label)
-        FadeTransition(Duration.seconds(0.5), label).apply {
-            fromValue = 0.0
-            toValue = 1.0
-            interpolator = Interpolator.EASE_BOTH
+        SequentialTransition(
+            FadeTransition(Duration.seconds(0.5), label).apply {
+                fromValue = 0.0
+                toValue = 1.0
+                interpolator = Interpolator.EASE_BOTH
+            },
+            PauseTransition(Duration.seconds(2.0)),
+            FadeTransition(Duration.seconds(0.5), label).apply {
+                fromValue = 1.0
+                toValue = 0.0
+                interpolator = Interpolator.EASE_BOTH
+            }
+        ).apply {
+            setOnFinished { vBox.children.remove(label) }
         }.play()
     }
 }
