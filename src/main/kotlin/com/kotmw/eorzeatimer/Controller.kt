@@ -16,13 +16,10 @@ import javafx.stage.Stage
 import javafx.stage.StageStyle
 import javafx.util.Duration
 import java.net.URL
-import java.text.SimpleDateFormat
-import java.time.*
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.format.ResolverStyle
 import java.util.*
-import kotlin.math.floor
-import kotlin.math.round
 
 class Controller : Initializable{
 
@@ -63,14 +60,26 @@ class Controller : Initializable{
             })
         }
         hourInput.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23)
+        hourInput.editor.textProperty().addListener { _, _, newValue ->
+            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 23)
+                hourInput.editor.text = 23.toString()
+        }
         hourInput.focusedProperty().addListener { _, _, newValue ->
             if (!newValue && hourInput.value > 23) hourInput.valueFactory.value = 23
         }
         minuteInput.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59)
+        minuteInput.editor.textProperty().addListener { _, _, newValue ->
+            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 60)
+                minuteInput.editor.text = 60.toString()
+        }
         minuteInput.focusedProperty().addListener { _, _, newValue ->
             if (!newValue && minuteInput.value > 59) minuteInput.valueFactory.value = 59
         }
         agoMinute.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 60)
+        agoMinute.editor.textProperty().addListener { _, _, newValue ->
+            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 60)
+                agoMinute.editor.text = 60.toString()
+        }
         agoMinute.focusedProperty().addListener { _, _, newValue ->
             if (!newValue && agoMinute.value > 60) agoMinute.valueFactory.value = 60
         }
@@ -210,5 +219,11 @@ class Controller : Initializable{
         ).apply {
             setOnFinished { vBox.children.remove(label) }
         }.play()
+    }
+
+    private fun isNumber(text: String): Boolean {
+        for (char in text.toCharArray())
+            if (!char.isDigit()) return false
+        return true
     }
 }

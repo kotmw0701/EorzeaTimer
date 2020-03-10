@@ -3,3 +3,5 @@ build/
 .idea/
 /gradlew
 /gradlew.bat
+/jre/
+/dist/
