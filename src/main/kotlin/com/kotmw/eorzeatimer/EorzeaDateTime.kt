@@ -51,7 +51,7 @@ class EorzeaDateTime private constructor(
                 (eorzeaTime / SECOND % 60).toByte())
         }
 
-        fun now(): EorzeaDateTime = convert(OffsetDateTime.now().toInstant().toEpochMilli())
+        fun now(offset: Int = 0): EorzeaDateTime = convert(OffsetDateTime.now().toInstant().toEpochMilli() + offset)
 
         fun convertLTtoET(localDateTime: LocalDateTime) = convert(localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli())
     }

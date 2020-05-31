@@ -1,6 +1,8 @@
 package com.kotmw.eorzeatimer
 
 import javafx.animation.*
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.fxml.FXML
@@ -36,6 +38,8 @@ class Controller : Initializable{
     @FXML lateinit var areaSelect: ChoiceBox<String>
     @FXML lateinit var patchSelect: ChoiceBox<String>
     @FXML lateinit var timerTempList: VBox
+    @FXML lateinit var command: TextArea
+    @FXML lateinit var adjust: Label
 
     private lateinit var vBox: VBox
 
@@ -43,6 +47,8 @@ class Controller : Initializable{
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy / MM / dd HH:mm:ss")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+    private var adjustProperty: StringProperty = SimpleStringProperty("0")
 
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         classSelect.items.addAll("全て", "採掘師", "園芸師")
@@ -59,30 +65,12 @@ class Controller : Initializable{
                 setOnAction { addAlarm(alarmTempData) }
             })
         }
-        hourInput.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23)
-        hourInput.editor.textProperty().addListener { _, _, newValue ->
-            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 23)
-                hourInput.editor.text = 23.toString()
-        }
-        hourInput.focusedProperty().addListener { _, _, newValue ->
-            if (!newValue && hourInput.value > 23) hourInput.valueFactory.value = 23
-        }
-        minuteInput.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59)
-        minuteInput.editor.textProperty().addListener { _, _, newValue ->
-            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 60)
-                minuteInput.editor.text = 60.toString()
-        }
-        minuteInput.focusedProperty().addListener { _, _, newValue ->
-            if (!newValue && minuteInput.value > 59) minuteInput.valueFactory.value = 59
-        }
-        agoMinute.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(0, 60)
-        agoMinute.editor.textProperty().addListener { _, _, newValue ->
-            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > 60)
-                agoMinute.editor.text = 60.toString()
-        }
-        agoMinute.focusedProperty().addListener { _, _, newValue ->
-            if (!newValue && agoMinute.value > 60) agoMinute.valueFactory.value = 60
-        }
+
+        adjust.textProperty().bind(adjustProperty)
+
+        initSpinner(hourInput, 0, 23)
+        initSpinner(minuteInput, 0, 59)
+        initSpinner(agoMinute, 0, 60)
 
         val screen = Screen.getPrimary().bounds
         vBox = VBox().apply {
@@ -110,10 +98,10 @@ class Controller : Initializable{
         val timeline = Timeline(
             KeyFrame(
                 Duration.seconds(0.05),
-                EventHandler<ActionEvent> {
-                    val date = EorzeaDateTime.now()
+                EventHandler {
+                    val date = EorzeaDateTime.now(adjustProperty.get().toInt())
                     val realDateTime = date.convertToRealTime()
-                    realTime.text = dateTimeFormatter.format(realDateTime)
+                    realTime.text = "${dateTimeFormatter.format(realDateTime)} (JST)"
                     eorzeaTime.text = date.format("%04d / %02d / %02d %02d:%02d:%02d")
                     alarmList.forEach {
                         if (it.localDateTime.hour == realDateTime.hour
@@ -130,6 +118,32 @@ class Controller : Initializable{
         )
         timeline.cycleCount = Timeline.INDEFINITE
         timeline.play()
+    }
+
+    private fun initSpinner(spinner: Spinner<Int>, minValue: Int, maxValue: Int) {
+        spinner.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(minValue, maxValue)
+        spinner.editor.textProperty().addListener { _, _, newValue ->
+            if (newValue.isEmpty()) return@addListener
+            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > maxValue) {
+                println("規定範囲内ではありません")
+                spinner.editor.text = maxValue.toString()
+            }
+        }
+        //フォーカス外した時に中身が無い場合に0を表示させる
+        spinner.focusedProperty().addListener { _, _, newValue ->
+            if (spinner.editor.text.isNullOrEmpty()) {
+                println("NullOrEmpty1")
+                spinner.editor.text = minValue.toString()
+            }
+            if (!newValue && (spinner.value == null || spinner.value < minValue)) {
+                println("規定範囲内ではありません②")
+                spinner.valueFactory.value = minValue
+            }
+        }
+        //Enter押したときに中身が無いとNPE吐くための対処
+        spinner.editor.setOnAction {
+            if (spinner.editor.text.isNullOrEmpty()) spinner.editor.text = minValue.toString()
+        }
     }
 
     fun onConfirm(actionEvent: ActionEvent) {
@@ -176,6 +190,15 @@ class Controller : Initializable{
             gridPane.addRow(0, Label("(%d)".format(agoMinute)))
             gridPane.columnConstraints.add(ColumnConstraints(30.0))
         }
+        val contextMenu = ContextMenu(MenuItem("削除").apply {
+            setOnAction {
+                alarmList.remove(alarmData)
+                alarmContainer.children.remove(gridPane)
+            }
+        })
+        gridPane.setOnContextMenuRequested {
+            contextMenu.show(gridPane, it.screenX, it.screenY)
+        }
         alarmContainer.children.add(gridPane)
         val label = Label().apply {
             textAlignment = TextAlignment.CENTER
@@ -185,7 +208,7 @@ class Controller : Initializable{
         }
         gridPane.setOnMouseEntered {
             label.text = "通知時刻\n(LT) ${timeFormatter.format(alarmData.localDateTime)}"
-            label.layoutX = it.sceneX
+            label.layoutX = it.sceneX+10
             label.layoutY = it.sceneY
             root.children.add(label)
         }
@@ -201,7 +224,8 @@ class Controller : Initializable{
             else timeFormatter.format(alarmData.localDateTime)
         val label = Label().apply {
             text = "\uD83D\uDD14 ${alarmData.title} - (${alarmData.targetType}) $time"
-            style = "-fx-font-size: 24px; -fx-text-fill: white; -fx-background-color: #0000FF60; -fx-background-radius: 10px"
+            padding = Insets(0.0, 7.5, 0.0, 7.5)
+            style = "-fx-font-size: 24px; -fx-text-fill: white; -fx-background-color: #0000FF70; -fx-background-radius: 50px"
         }
         vBox.children.add(label)
         SequentialTransition(
@@ -225,5 +249,49 @@ class Controller : Initializable{
         for (char in text.toCharArray())
             if (!char.isDigit()) return false
         return true
+    }
+
+    /*
+    /alarm  "アラーム テスト"  lt  1428
+    /alarm  "アラーム テスト"  lt  rp      28
+    /alarm  "アラーム テスト"  lt  1428    0
+    /alarm  "アラーム テスト"  lt  rp      28      0
+    /alarm  "アラーム テスト"  et  1428    0
+    /alarm  "アラーム テスト"  et  rp      1428    0
+
+    /alarm "アラーム テスト" et rp 1428 0
+     */
+    fun onRead(actionEvent: ActionEvent) {
+        for (line in command.text.split("\n")) {
+            if (!line.startsWith("/alarm")) continue
+            addAlarmCommand(line)
+        }
+    }
+
+    fun addAlarmCommand(command: String) {
+        val matches = Regex("([^\"]\\S*|\".+?\")\\s*").findAll(command).map { it.value.trim() }.toList()
+        val type = matches[2]
+        val isRepeat = matches.contains("rp")
+        val timeID = if (isRepeat) 4 else 3
+        val agoID = timeID + 1
+        if (matches.size < 4
+            || matches.size > 6
+            || !Regex("(et|lt)").matches(type)
+            || !isNumber(matches[timeID])
+            || (matches.size > agoID && !isNumber(matches[agoID]))) {
+            println("入力値がおかしいです")
+            return
+        }
+        val time = matches[timeID].toInt()
+        val agoMinute = if (matches.size > agoID) matches[agoID].toInt() else 0
+        val hour = if (time >= 100) time / 100 else 0
+        val minute = time % 100
+
+        addAlarm(matches[1], type.toUpperCase(), hour, minute, agoMinute)
+    }
+
+    fun onAdjust(actionEvent: ActionEvent) {
+        val param = this.adjustProperty.get().toInt() + (actionEvent.source as Button).text.toInt()
+        this.adjustProperty.set(param.toString())
     }
 }
