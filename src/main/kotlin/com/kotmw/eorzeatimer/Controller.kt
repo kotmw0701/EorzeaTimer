@@ -39,6 +39,7 @@ class Controller : Initializable{
     @FXML lateinit var root: AnchorPane
     @FXML lateinit var classSelect: ChoiceBox<String>
     @FXML lateinit var areaSelect: ChoiceBox<String>
+    @FXML lateinit var categorySelect: ChoiceBox<String>
     @FXML lateinit var patchSelect: ChoiceBox<String>
     @FXML lateinit var timerTempList: VBox
     @FXML lateinit var command: TextArea
@@ -56,18 +57,17 @@ class Controller : Initializable{
     override fun initialize(location: URL?, resources: ResourceBundle?) {
         classSelect.items.addAll("全て", "採掘師", "園芸師")
         classSelect.value = classSelect.items[0]
+        classSelect.setOnAction { updateAlarmTempData() }
         areaSelect.items.addAll("全て", "ラノシア", "ザナラーン", "クルザス", "モードゥナ", "ドラヴァニア", "アバラシア", "ギラバニア", "オサード", "ノルヴラント")
         areaSelect.value = areaSelect.items[0]
+        areaSelect.setOnAction { updateAlarmTempData() }
+        categorySelect.items.addAll("全て", "未知", "伝説", "刻限")
+        categorySelect.value = categorySelect.items[0]
+        categorySelect.setOnAction { updateAlarmTempData() }
         patchSelect.items.addAll("全て", "新生(2.x)", "蒼天(3.x)", "紅蓮(4.x)", "漆黒(5.x)")
         patchSelect.value = areaSelect.items[0]
-        AlarmDataStore.getList().forEach {
-            timerTempList.children.add(Button().apply {
-                prefWidth = 264.0
-                graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${"%02d".format(it.hour)}:00"))
-                val alarmTempData = it
-                setOnAction { addAlarm(alarmTempData) }
-            })
-        }
+        patchSelect.setOnAction { updateAlarmTempData() }
+        updateAlarmTempData()
 
         adjust.textProperty().bind(adjustProperty)
         adjustProperty.set(checkOffsetNTP().toString())
@@ -296,4 +296,25 @@ class Controller : Initializable{
         client.close()
         return info.offset
     }
+
+    private fun updateAlarmTempData() {
+        timerTempList.children.clear()
+        narrowdown(categorySelect.value, classSelect.value, areaSelect.value, patchSelect.value).forEach {
+            timerTempList.children.add(Button().apply {
+                prefWidth = 264.0
+                graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${"%02d".format(it.hour)}:00"))
+                val alarmTempData = it
+                setOnAction { addAlarm(alarmTempData) }
+            })
+        }
+    }
+
+    private fun narrowdown(category: String, gatherer: String, area: String, patch: String): List<AlarmTempData> {
+        return AlarmDataStore.getList()
+            .filter { data -> category == "全て" || data.category == category }
+            .filter { data -> gatherer == "全て" || data.gatherer == gatherer }
+            .filter { data -> area == "全て" || data.area == area }
+            .filter { data -> patch == "全て" || data.patch == patch }
+    }
+
 }

@@ -12,6 +12,7 @@ data class AlarmData(
 
 data class AlarmTempData(
     val title: String,
+    val category: String,
     val gatherer: String,
     val area: String,
     val patch: String,
