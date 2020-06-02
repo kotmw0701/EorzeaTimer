@@ -258,7 +258,7 @@
           </Tab>
         </tabs>
       </TabPane>
-      <VBox layoutX="14.0" layoutY="592.0" prefHeight="90.0" prefWidth="362.0">
+      <VBox layoutX="14.0" layoutY="592.0" prefHeight="90.0" prefWidth="425.0">
          <children>
             <Label prefHeight="34.0" prefWidth="427.0" text="ゲーム内のエオルゼア時間表示とずれてる場合が多々あります、&#10;気になる場合は以下の数値で調整してください (ミリ秒)" wrapText="true">
                <padding>
@@ -267,11 +267,13 @@
             </Label>
             <HBox alignment="CENTER" prefWidth="425.0" spacing="10.0">
                <children>
+                  <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="-100" />
                   <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="-10" />
                   <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="-1" />
                   <Label fx:id="adjust" alignment="CENTER" prefWidth="50.0" text="0" />
                   <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="+1" />
                   <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="+10" />
+                  <Button mnemonicParsing="false" onAction="#onAdjust" prefWidth="50.0" text="+100" />
                </children>
                <VBox.margin>
                   <Insets top="10.0" />

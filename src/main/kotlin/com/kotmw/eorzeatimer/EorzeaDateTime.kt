@@ -29,17 +29,17 @@ class EorzeaDateTime private constructor(
     }
 
     companion object {
-        const val YEAR   = 33177600
-        const val MONTH  = 2764800
+        const val YEAR   = 33177600 //384 day
+        const val MONTH  = 2764800  //32 day
         const val DAY    = 86400
         const val HOUR   = 3600
         const val MINUTE = 60
         const val SECOND = 1
 
-        const val EORZEA_MULTIPLIER = 3600.toDouble() / 175
+        const val EORZEA_MULTIPLIER = 3600.0 / 175.0
 
         private fun convert(epochMilli: Long): EorzeaDateTime {
-            val date = epochMilli / 1000.toDouble()
+            val date = epochMilli / 1000.0
             val eorzeaTime = floor(date * EORZEA_MULTIPLIER).toLong()
 
             return EorzeaDateTime(
@@ -51,8 +51,8 @@ class EorzeaDateTime private constructor(
                 (eorzeaTime / SECOND % 60).toByte())
         }
 
-        fun now(offset: Int = 0): EorzeaDateTime = convert(OffsetDateTime.now().toInstant().toEpochMilli() + offset)
+        fun now(offset: Long = 0): EorzeaDateTime = convert(System.currentTimeMillis() + offset)//OffsetDateTime.now().toInstant().toEpochMilli()
 
-        fun convertLTtoET(localDateTime: LocalDateTime) = convert(localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli())
+        fun convertLTtoET(localDateTime: LocalDateTime, offset: Int) = convert(localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli() + offset)
     }
 }

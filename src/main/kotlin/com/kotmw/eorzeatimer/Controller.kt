@@ -17,7 +17,10 @@ import javafx.stage.Screen
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import javafx.util.Duration
+import org.apache.commons.net.ntp.NTPUDPClient
+import java.net.InetAddress
 import java.net.URL
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -67,6 +70,7 @@ class Controller : Initializable{
         }
 
         adjust.textProperty().bind(adjustProperty)
+        adjustProperty.set(checkOffsetNTP().toString())
 
         initSpinner(hourInput, 0, 23)
         initSpinner(minuteInput, 0, 59)
@@ -99,17 +103,16 @@ class Controller : Initializable{
             KeyFrame(
                 Duration.seconds(0.05),
                 EventHandler {
-                    val date = EorzeaDateTime.now(adjustProperty.get().toInt())
+                    val date = EorzeaDateTime.now(adjustProperty.get().toLong())
                     val realDateTime = date.convertToRealTime()
                     realTime.text = "${dateTimeFormatter.format(realDateTime)} (JST)"
                     eorzeaTime.text = date.format("%04d / %02d / %02d %02d:%02d:%02d")
                     alarmList.forEach {
-                        if (it.localDateTime.hour == realDateTime.hour
-                            && it.localDateTime.minute == realDateTime.minute
-                            && it.localDateTime.second == realDateTime.second) {
+                        if (it.localDateTime.isEqual(realDateTime)) {
                             println("${it.title} 指定時刻です")
                             onNotify(it)
-                            it.eorzeaDateTime.day++
+                            if (it.targetType == "ET") it.eorzeaDateTime.day++
+                            else it.localDateTime = it.localDateTime.plusDays(1)
                             it.localDateTime = it.eorzeaDateTime.convertToRealTime()
                         }
                     }
@@ -123,8 +126,9 @@ class Controller : Initializable{
     private fun initSpinner(spinner: Spinner<Int>, minValue: Int, maxValue: Int) {
         spinner.valueFactory = SpinnerValueFactory.IntegerSpinnerValueFactory(minValue, maxValue)
         spinner.editor.textProperty().addListener { _, _, newValue ->
-            if (newValue.isEmpty()) return@addListener
-            if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > maxValue) {
+            if (newValue.isEmpty()) {
+                spinner.editor.text = minValue.toString()
+            } else if (!isNumber(newValue) || newValue.substring(0, if (newValue.length > 2) 3 else newValue.length).toInt() > maxValue) {
                 println("規定範囲内ではありません")
                 spinner.editor.text = maxValue.toString()
             }
@@ -160,7 +164,7 @@ class Controller : Initializable{
         val eorzeaDateTime: EorzeaDateTime
         val localDateTime: LocalDateTime
         if (type == "ET") {
-            eorzeaDateTime = EorzeaDateTime.now().apply {
+            eorzeaDateTime = EorzeaDateTime.now(adjustProperty.get().toLong()).apply {
                 this.hour = hour.toByte()
                 this.minute = minute.toByte()
                 this.second = 0
@@ -168,7 +172,7 @@ class Controller : Initializable{
             }
             localDateTime = eorzeaDateTime.convertToRealTime()
         } else {
-            eorzeaDateTime = EorzeaDateTime.now()
+            eorzeaDateTime = EorzeaDateTime.now(adjustProperty.get().toLong())
             localDateTime = LocalDateTime.now().run {
                 if (this.hour >= hour && this.minute >= minute) withDayOfMonth(dayOfMonth + 1)
                 with(LocalTime.of(hour, minute, 0))
@@ -232,13 +236,11 @@ class Controller : Initializable{
             FadeTransition(Duration.seconds(0.5), label).apply {
                 fromValue = 0.0
                 toValue = 1.0
-                interpolator = Interpolator.EASE_BOTH
             },
             PauseTransition(Duration.seconds(2.0)),
             FadeTransition(Duration.seconds(0.5), label).apply {
                 fromValue = 1.0
                 toValue = 0.0
-                interpolator = Interpolator.EASE_BOTH
             }
         ).apply {
             setOnFinished { vBox.children.remove(label) }
@@ -246,21 +248,12 @@ class Controller : Initializable{
     }
 
     private fun isNumber(text: String): Boolean {
+        if (text.isEmpty()) return false
         for (char in text.toCharArray())
             if (!char.isDigit()) return false
         return true
     }
 
-    /*
-    /alarm  "アラーム テスト"  lt  1428
-    /alarm  "アラーム テスト"  lt  rp      28
-    /alarm  "アラーム テスト"  lt  1428    0
-    /alarm  "アラーム テスト"  lt  rp      28      0
-    /alarm  "アラーム テスト"  et  1428    0
-    /alarm  "アラーム テスト"  et  rp      1428    0
-
-    /alarm "アラーム テスト" et rp 1428 0
-     */
     fun onRead(actionEvent: ActionEvent) {
         for (line in command.text.split("\n")) {
             if (!line.startsWith("/alarm")) continue
@@ -293,5 +286,14 @@ class Controller : Initializable{
     fun onAdjust(actionEvent: ActionEvent) {
         val param = this.adjustProperty.get().toInt() + (actionEvent.source as Button).text.toInt()
         this.adjustProperty.set(param.toString())
+    }
+
+    private fun checkOffsetNTP(): Long {
+        val client = NTPUDPClient()
+        client.open()
+        val info = client.getTime(InetAddress.getByName("ntp.nict.jp"))
+        info.computeDetails()
+        client.close()
+        return info.offset
     }
 }

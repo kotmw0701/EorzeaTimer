@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    api("commons-net:commons-net:3.6")
     implementation(kotlin("stdlib-jdk8"))
 }
 
