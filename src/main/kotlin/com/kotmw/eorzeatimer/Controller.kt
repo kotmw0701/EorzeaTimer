@@ -20,7 +20,6 @@ import javafx.util.Duration
 import org.apache.commons.net.ntp.NTPUDPClient
 import java.net.InetAddress
 import java.net.URL
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -299,7 +298,7 @@ class Controller : Initializable{
 
     private fun updateAlarmTempData() {
         timerTempList.children.clear()
-        narrowdown(categorySelect.value, classSelect.value, areaSelect.value, patchSelect.value).forEach {
+        narrowDown(categorySelect.value, classSelect.value, areaSelect.value, patchSelect.value).forEach {
             timerTempList.children.add(Button().apply {
                 prefWidth = 264.0
                 graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${"%02d".format(it.hour)}:00"))
@@ -309,7 +308,7 @@ class Controller : Initializable{
         }
     }
 
-    private fun narrowdown(category: String, gatherer: String, area: String, patch: String): List<AlarmTempData> {
+    private fun narrowDown(category: String, gatherer: String, area: String, patch: String): List<AlarmTempData> {
         return AlarmDataStore.getList()
             .filter { data -> category == "全て" || data.category == category }
             .filter { data -> gatherer == "全て" || data.gatherer == gatherer }

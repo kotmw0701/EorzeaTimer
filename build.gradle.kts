@@ -12,8 +12,10 @@ repositories {
 }
 
 dependencies {
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    api("commons-net:commons-net:3.6")
+    implementation("commons-net:commons-net:3.6")
+    implementation("com.google.api-client:google-api-client:1.30.4")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.30.4")
+    implementation("com.google.apis:google-api-services-sheets:v4-rev581-1.25.0")
     implementation(kotlin("stdlib-jdk8"))
 }
 
@@ -40,7 +42,7 @@ val jar by tasks.getting(Jar::class) {
         attributes["Main-Class"] = "com.kotmw.eorzeatimer.MainKt"
     }
     from(
-        configurations.compile.get().map {
+        configurations.compileClasspath.get().map {
             if (it.isDirectory) it else zipTree(it)
         }
     )

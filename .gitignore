@@ -3,5 +3,8 @@ build/
 .idea/
 /gradlew
 /gradlew.bat
-/jre/
+/dist/jre/
 /dist/
+/src/main/resources/credentials.json
+/src/main/resources/credentials2.json
+/tokens/
