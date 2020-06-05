@@ -1,6 +1,7 @@
 package com.kotmw.eorzeatimer
 
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class AlarmData(
     val title: String,
@@ -16,7 +17,7 @@ data class AlarmTempData(
     val gatherer: String,
     val area: String,
     val patch: String,
-    val hour: Int
+    val time: LocalTime
 )
 
 

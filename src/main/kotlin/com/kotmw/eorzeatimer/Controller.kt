@@ -47,6 +47,7 @@ class Controller : Initializable{
     private lateinit var vBox: VBox
 
     private val alarmList = mutableListOf<AlarmData>()
+    private lateinit var alarmTempDatas: List<AlarmTempData>
 
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy / MM / dd HH:mm:ss")
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
@@ -63,9 +64,10 @@ class Controller : Initializable{
         categorySelect.items.addAll("全て", "未知", "伝説", "刻限")
         categorySelect.value = categorySelect.items[0]
         categorySelect.setOnAction { updateAlarmTempData() }
-        patchSelect.items.addAll("全て", "新生(2.x)", "蒼天(3.x)", "紅蓮(4.x)", "漆黒(5.x)")
+        patchSelect.items.addAll("全て", "2.x", "3.x", "4.x", "5.x")
         patchSelect.value = areaSelect.items[0]
         patchSelect.setOnAction { updateAlarmTempData() }
+        alarmTempDatas = DatabaseManager().getTempData()
         updateAlarmTempData()
 
         adjust.textProperty().bind(adjustProperty)
@@ -156,7 +158,7 @@ class Controller : Initializable{
     }
 
     fun addAlarm(alarmTempData: AlarmTempData) {
-        addAlarm(alarmTempData.title, "ET", alarmTempData.hour)
+        addAlarm(alarmTempData.title, "ET", alarmTempData.time.hour)
     }
 
     fun addAlarm(title: String, type: String, hour: Int, minute: Int = 0, agoMinute: Int = 0) {
@@ -301,7 +303,7 @@ class Controller : Initializable{
         narrowDown(categorySelect.value, classSelect.value, areaSelect.value, patchSelect.value).forEach {
             timerTempList.children.add(Button().apply {
                 prefWidth = 264.0
-                graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${"%02d".format(it.hour)}:00"))
+                graphic = HBox(Label(it.title).apply { prefWidth = 170.0 }, Label(it.gatherer), Label("  ${it.time}"))
                 val alarmTempData = it
                 setOnAction { addAlarm(alarmTempData) }
             })
@@ -309,7 +311,7 @@ class Controller : Initializable{
     }
 
     private fun narrowDown(category: String, gatherer: String, area: String, patch: String): List<AlarmTempData> {
-        return AlarmDataStore.getList()
+        return alarmTempDatas
             .filter { data -> category == "全て" || data.category == category }
             .filter { data -> gatherer == "全て" || data.gatherer == gatherer }
             .filter { data -> area == "全て" || data.area == area }

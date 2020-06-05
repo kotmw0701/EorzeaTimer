@@ -74,7 +74,7 @@
                </content>
             </ScrollPane>
          </children></VBox>
-      <VBox layoutX="485.0" layoutY="387.0" style="-fx-border-color: gray; -fx-border-radius: 5px;">
+      <VBox layoutX="485.0" layoutY="387.0" spacing="5.0" style="-fx-border-color: gray; -fx-border-radius: 5px;">
          <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="5.0" />
          </padding>
@@ -132,13 +132,10 @@
                   </HBox>
                </children>
             </HBox>
-            <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="200.0" styleClass="edge-to-edge" vbarPolicy="ALWAYS">
+            <ScrollPane hbarPolicy="NEVER" prefHeight="200.0" prefWidth="294.0" styleClass="edge-to-edge" vbarPolicy="ALWAYS">
                <content>
                   <VBox fx:id="timerTempList" prefHeight="1.0" prefWidth="265.0" />
                </content>
-               <VBox.margin>
-                  <Insets top="5.0" />
-               </VBox.margin>
             </ScrollPane>
          </children>
       </VBox>
