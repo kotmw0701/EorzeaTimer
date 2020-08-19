@@ -1,5 +1,6 @@
 package com.kotmw.eorzeatimer
 
+import com.kotmw.eorzeaweather.Weather
 import javafx.animation.*
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
@@ -122,6 +123,7 @@ class Controller : Initializable{
         )
         timeline.cycleCount = Timeline.INDEFINITE
         timeline.play()
+        Weather()
     }
 
     private fun initSpinner(spinner: Spinner<Int>, minValue: Int, maxValue: Int) {
